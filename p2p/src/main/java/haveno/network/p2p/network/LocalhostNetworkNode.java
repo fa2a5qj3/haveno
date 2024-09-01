@@ -67,7 +67,7 @@ public class LocalhostNetworkNode extends NetworkNode {
 
         // simulate tor connection delay
         UserThread.runAfter(() -> {
-            nodeAddressProperty.set(new NodeAddress("0.0.0.0", servicePort));
+            nodeAddressProperty.set(new NodeAddress("localhost", servicePort));
 
             setupListeners.stream().forEach(SetupListener::onTorNodeReady);
 

@@ -1735,6 +1735,9 @@ public class XmrWalletService extends XmrWalletBase {
         if (port != null && port > 0) {
             cmd.add("--rpc-bind-port");
             cmd.add(Integer.toString(port));
+            cmd.add("--rpc-bind-ip");
+            cmd.add("0.0.0.0");
+            cmd.add("--confirm-external-bind");
         }
 
         // start monero-wallet-rpc instance and return connected client
