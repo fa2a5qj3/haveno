@@ -26,7 +26,11 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import java.io.IOException;
-
+import java.net.NetworkInterface;
+import java.net.InetAddress;
+import java.net.Inet4Address;
+import java.net.SocketException;
+import java.util.Enumeration;
 import java.util.concurrent.TimeUnit;
 
 import org.slf4j.Logger;
@@ -67,7 +71,7 @@ public class LocalhostNetworkNode extends NetworkNode {
 
         // simulate tor connection delay
         UserThread.runAfter(() -> {
-            nodeAddressProperty.set(new NodeAddress("localhost", servicePort));
+            nodeAddressProperty.set(new NodeAddress(getMyIp(), servicePort));
 
             setupListeners.stream().forEach(SetupListener::onTorNodeReady);
 
@@ -87,5 +91,25 @@ public class LocalhostNetworkNode extends NetworkNode {
     @Override
     protected Socket createSocket(NodeAddress peerNodeAddress) throws IOException {
         return new Socket(peerNodeAddress.getHostName(), peerNodeAddress.getPort());
+    }
+
+    private String getMyIp() {
+        try {
+            Enumeration<NetworkInterface> ifs = NetworkInterface.getNetworkInterfaces();
+            while (ifs.hasMoreElements()) {
+                NetworkInterface iface = ifs.nextElement();
+                if (iface.isLoopback() || !iface.isUp())
+                    continue;
+                Enumeration<InetAddress> addrs = iface.getInetAddresses();
+                while (addrs.hasMoreElements()) {
+                    InetAddress addr = addrs.nextElement();
+                    if (Inet4Address.class == addr.getClass()) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (SocketException e) {
+        }
+        return "localhost";
     }
 }
